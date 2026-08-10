@@ -24,4 +24,5 @@ test("normalizes YYMMDD dates and excludes unlisted profiles", () => {
   assert.equal(archive.members[0].media[0].month, 7);
   assert.equal(archive.other.media[0].kind, "video");
   assert.equal(archive.other.media[0].month, 6);
+  assert.equal(archive.other.media[0].name, "260601 post.mp4");
 });

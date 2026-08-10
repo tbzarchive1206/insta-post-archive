@@ -25,7 +25,7 @@ function dateCode(value, fallback = "") {
   return Number(`${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, "0")}${String(date.getUTCDate()).padStart(2, "0")}`);
 }
 
-function compactMedia(node) {
+function compactMedia(node, includeName = false) {
   const kind = node.mimeType.startsWith("image/")
     ? "image"
     : node.mimeType.startsWith("audio/")
@@ -37,6 +37,7 @@ function compactMedia(node) {
   const value = String(date).padStart(8, "0");
   return {
     id: node.id,
+    ...(includeName ? { name: node.name } : {}),
     kind,
     mimeType: node.mimeType,
     date,
@@ -52,7 +53,7 @@ export function normalizeArchive(raw) {
     if (!folder) return [];
     const media = raw.nodes
       .filter((node) => node.type !== "folder" && node.path[1] === folder.name)
-      .map(compactMedia)
+      .map((node) => compactMedia(node))
       .sort((a, b) => b.date - a.date);
     return [{ id: folder.id, name: displayName, media }];
   });
@@ -62,7 +63,7 @@ export function normalizeArchive(raw) {
     id: otherFolder?.id || "1zNeQEYRHTviwSAsHwvgxjz9rSXOFVR8l",
     name: "TBZ on Other People’s Profiles",
     media: otherFolder
-      ? raw.nodes.filter((node) => node.type !== "folder" && node.path[1] === otherFolder.name).map(compactMedia).sort((a, b) => b.date - a.date)
+      ? raw.nodes.filter((node) => node.type !== "folder" && node.path[1] === otherFolder.name).map((node) => compactMedia(node, true)).sort((a, b) => b.date - a.date)
       : [],
   };
 

@@ -7,6 +7,7 @@ type Media = {
   date: number;
   year: number;
   month: number;
+  name?: string;
 };
 
 type Collection = { id: string; name: string; media: Media[] };
@@ -26,12 +27,24 @@ const fileUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComp
 const previewUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`;
 const directUrl = (id: string) => `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
 
-function MediaTile({ media }: { media: Media }) {
+function MediaActions({ media, showName }: { media: Media; showName: boolean }) {
+  return (
+    <div className="image-actions">
+      {showName && <span className="file-name" title={media.name}>{media.name}</span>}
+      <span className="file-action-links">
+        <a href={fileUrl(media.id)} target="_blank" rel="noreferrer">VIEW ↗</a>
+        <a href={directUrl(media.id)} target="_blank" rel="noreferrer">DOWNLOAD ↓</a>
+      </span>
+    </div>
+  );
+}
+
+function MediaTile({ media, showName = false }: { media: Media; showName?: boolean }) {
   if (media.kind === "video") {
     return (
       <figure className="media-tile video-tile">
         <iframe src={previewUrl(media.id)} title="Instagram video" allow="autoplay; fullscreen" loading="lazy" />
-        <a className="media-link" href={fileUrl(media.id)} target="_blank" rel="noreferrer">OPEN VIDEO ↗</a>
+        <MediaActions media={media} showName={showName} />
       </figure>
     );
   }
@@ -41,13 +54,13 @@ function MediaTile({ media }: { media: Media }) {
       <figure className="media-tile audio-tile">
         <div className="audio-mark" aria-hidden="true">AUDIO / INSTAGRAM</div>
         <iframe src={previewUrl(media.id)} title="Instagram audio" allow="autoplay" loading="lazy" />
-        <a className="media-link" href={fileUrl(media.id)} target="_blank" rel="noreferrer">OPEN IN DRIVE ↗</a>
+        <MediaActions media={media} showName={showName} />
       </figure>
     );
   }
 
   if (media.kind !== "image") {
-    return <a className="unsupported-tile" href={fileUrl(media.id)} target="_blank" rel="noreferrer">OPEN FILE IN DRIVE ↗</a>;
+    return <figure className="media-tile unsupported-media"><a className="unsupported-tile" href={fileUrl(media.id)} target="_blank" rel="noreferrer">OPEN FILE IN DRIVE ↗</a><MediaActions media={media} showName={showName} /></figure>;
   }
 
   return (
@@ -55,10 +68,7 @@ function MediaTile({ media }: { media: Media }) {
       <a href={fileUrl(media.id)} target="_blank" rel="noreferrer" aria-label="Open original image in Google Drive">
         <img src={thumbnail(media.id)} alt="" loading="lazy" />
       </a>
-      <div className="image-actions">
-        <a href={fileUrl(media.id)} target="_blank" rel="noreferrer">VIEW ↗</a>
-        <a href={directUrl(media.id)} target="_blank" rel="noreferrer">DOWNLOAD ↓</a>
-      </div>
+      <MediaActions media={media} showName={showName} />
     </figure>
   );
 }
@@ -154,7 +164,7 @@ export function InstaArchive({ data }: { data: Archive }) {
             <span>NEWEST FIRST</span>
           </div>
           {media.length ? (
-            <div className="media-grid">{media.slice(0, shown).map((item) => <MediaTile key={item.id} media={item} />)}</div>
+            <div className="media-grid">{media.slice(0, shown).map((item) => <MediaTile key={item.id} media={item} showName={collection.id === data.other.id} />)}</div>
           ) : (
             <div className="empty member-empty"><strong>NO MEDIA</strong>THERE ARE NO UPLOADS FOR THIS MONTH.</div>
           )}
