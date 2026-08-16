@@ -5,20 +5,27 @@ import { fileURLToPath } from "node:url";
 export const ROOT_FOLDER_ID = "18x3sDWTEUpoZVWT3sHc1Q0oWqgXCmc1G";
 
 const allowedMembers = [
-  ["SANGYEON", "Sangyeon"],
-  ["JACOB", "Jacob"],
-  ["YOUNGHOON", "Younghoon"],
-  ["HYUNJAE", "Hyunjae"],
-  ["JUYEON", "Juyeon"],
-  ["KEVIN", "Kevin"],
-  ["CHANGMIN", "Q"],
-  ["SUNWOO", "Sunwoo"],
-  ["ERIC", "Eric"],
+  [["SANGYEON"], "Sangyeon"],
+  [["JACOB"], "Jacob"],
+  [["YOUNGHOON"], "Younghoon"],
+  [["HYUNJAE"], "Hyunjae"],
+  [["JUYEON"], "Juyeon"],
+  [["KEVIN"], "Kevin"],
+  [["CHANGMIN", "Q"], "Q"],
+  [["SUNWOO"], "Sunwoo"],
+  [["ERIC"], "Eric"],
+  [["HAKNYEON"], "Haknyeon (2017 - 2025)"],
+  [["CHANHEE", "NEW"], "New (2017 - 2026)"],
 ];
 
 function dateCode(value, fallback = "") {
   const match = String(value).match(/^(\d{6})/u);
   if (match) return Number(`20${match[1]}`);
+  const timestamp = String(value).match(/(?:^|_)(1[5-9]\d{8})(?:_|$)/u);
+  if (timestamp) {
+    const date = new Date(Number(timestamp[1]) * 1000);
+    return Number(`${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, "0")}${String(date.getUTCDate()).padStart(2, "0")}`);
+  }
   const time = Date.parse(fallback);
   if (Number.isNaN(time)) return 0;
   const date = new Date(time);
@@ -48,8 +55,8 @@ function compactMedia(node, includeName = false) {
 
 export function normalizeArchive(raw) {
   const topFolders = raw.nodes.filter((node) => node.type === "folder" && node.path.length === 1);
-  const members = allowedMembers.flatMap(([folderName, displayName]) => {
-    const folder = topFolders.find((item) => item.name.replace(/^\d+\.\s*/u, "").toUpperCase().startsWith(folderName));
+  const members = allowedMembers.flatMap(([folderNames, displayName]) => {
+    const folder = topFolders.find((item) => folderNames.some((folderName) => item.name.replace(/^\d+\.\s*/u, "").toUpperCase().startsWith(folderName)));
     if (!folder) return [];
     const media = raw.nodes
       .filter((node) => node.type !== "folder" && node.path[1] === folder.name)

@@ -95,9 +95,13 @@ export function InstaArchive({ data }: { data: Archive }) {
   );
 
   const chooseCollection = (next: Collection) => {
+    const availableYears = [...new Set(next.media.map((item) => item.year))].sort((a, b) => b - a);
+    const selectedYear = availableYears.includes(now.getFullYear()) ? now.getFullYear() : availableYears[0] || now.getFullYear();
+    const availableMonths = [...new Set(next.media.filter((item) => item.year === selectedYear).map((item) => item.month))].sort((a, b) => b - a);
+    const selectedMonth = selectedYear === now.getFullYear() && availableMonths.includes(now.getMonth() + 1) ? now.getMonth() + 1 : availableMonths[0] || now.getMonth() + 1;
     setCollection(next);
-    setYear(now.getFullYear());
-    setMonth(now.getMonth() + 1);
+    setYear(selectedYear);
+    setMonth(selectedMonth);
     setShown(pageSize);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -133,7 +137,7 @@ export function InstaArchive({ data }: { data: Archive }) {
             ))}
           </div>
           <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
-            <span>10 / SPECIAL COLLECTION</span>
+            <span>{String(data.members.length + 1).padStart(2, "0")} / SPECIAL COLLECTION</span>
             <strong>TBZ ON OTHER PEOPLE’S PROFILES</strong>
             <em>다른 사람 프로필 속 TBZ</em>
             <small>{data.other.media.length.toLocaleString("en-US")} MEDIA FILES →</small>
