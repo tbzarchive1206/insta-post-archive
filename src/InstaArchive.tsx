@@ -110,7 +110,7 @@ export function InstaArchive({ data }: { data: Archive }) {
     <main id="top">
       <header className="masthead">
         <div className="utility">
-          <a className="brand" href="https://tbzarchive1206.github.io/tbzarchive/">THE BOYZ / FAN ARCHIVE</a>
+          <a className="brand" href="https://tbzarchive.com">THE BOYZ / FAN ARCHIVE</a>
           <nav><span>INSTAGRAM POSTS</span><span>/</span><a href="https://x.com/tbzarchive1206_" target="_blank" rel="noreferrer">TWITTER ↗</a></nav>
         </div>
         <h1><span className="solid">INSTA POSTS</span><span className="outline">ARCHIVE</span></h1>
