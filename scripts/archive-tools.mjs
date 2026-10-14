@@ -1,3 +1,4 @@
+import { normalizeArchive as normalizeOfficial } from "./official-tools.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -79,6 +80,7 @@ export function normalizeArchive(raw) {
     sourceFolderId: ROOT_FOLDER_ID,
     members,
     other,
+    official: normalizeOfficial({ generatedAt: raw.generatedAt, nodes: raw.nodes.filter((node) => node.path[0] === "OFFICIAL_THEBOYZ") }),
   };
 }
 

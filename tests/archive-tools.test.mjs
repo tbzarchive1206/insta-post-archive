@@ -31,3 +31,17 @@ test("normalizes dates and keeps former members at the end", () => {
   assert.equal(archive.other.media[0].month, 6);
   assert.equal(archive.other.media[0].name, "260601 post.mp4");
 });
+
+test("keeps official media separate and parses Twitter filename tags and dates", () => {
+ const archive = normalizeArchive({ generatedAt: "2026-10-14T00:00:00Z", nodes: [
+  {id: "older", name: "171206 GROUP PHOTO.jpg", type: "file", mimeType: "image/jpeg", path: ["OFFICIAL_THEBOYZ", "2017"]},
+  {id: "newer", name: "261014 SANGYEON JACOB.mp4", type: "file", mimeType: "video/mp4", path: ["OFFICIAL_THEBOYZ", "2026"]},
+  {id: "skip", name: "notes.txt", type: "file", mimeType: "text/plain", path: ["OFFICIAL_THEBOYZ"]}
+ ]});
+ assert.equal(archive.official.sourceFolderId, "1yveWb6H9nRlutNZiuv5H9RXKuvnFGM8b");
+ assert.deepEqual(archive.official.media.map(item => item.id), ["newer", "older"]);
+ assert.deepEqual(archive.official.media[0].members, ["Sangyeon", "Jacob"]);
+ assert.deepEqual(archive.official.media[1].members, ["Group photo"]);
+ assert.equal(archive.official.media[1].date, 20171206);
+ assert.equal(archive.other.media.length, 0);
+});

@@ -1,37 +1,22 @@
-import { writeNormalized, ROOT_FOLDER_ID } from "./archive-tools.mjs";
-
+import fs from "node:fs/promises";
+import { listFolder } from "./drive-client.mjs";
+import { normalizeArchive, ROOT_FOLDER_ID } from "./archive-tools.mjs";
 const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
 if (!apiKey) throw new Error("Missing GOOGLE_DRIVE_API_KEY.");
 
-async function listFolder(folderId) {
-  const files = [];
-  let pageToken = "";
-  do {
-    const params = new URLSearchParams({
-      key: apiKey,
-      q: `'${folderId}' in parents and trashed = false`,
-      fields: "nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime)",
-      pageSize: "1000",
-      orderBy: "name",
-    });
-    if (pageToken) params.set("pageToken", pageToken);
-    const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`);
-    if (!response.ok) throw new Error(`Drive API ${response.status}: ${await response.text()}`);
-    const data = await response.json();
-    files.push(...data.files);
-    pageToken = data.nextPageToken || "";
-  } while (pageToken);
-  return files;
-}
-
 const root = { id: ROOT_FOLDER_ID, title: "INSTA POSTS ARCHIVE", path: [] };
-let frontier = [root];
+let frontier = [root, { id: "1yveWb6H9nRlutNZiuv5H9RXKuvnFGM8b", title: "OFFICIAL_THEBOYZ", path: [] }];
 const nodes = [];
+const visited = new Set();
 while (frontier.length) {
   const next = [];
   for (let index = 0; index < frontier.length; index += 8) {
-    const batch = frontier.slice(index, index + 8);
-    const results = await Promise.all(batch.map(async (folder) => ({ folder, files: await listFolder(folder.id) })));
+    const batch = frontier.slice(index, index + 8).filter((folder) => {
+      if (visited.has(folder.id)) return false;
+      visited.add(folder.id);
+      return true;
+    });
+    const results = await Promise.all(batch.map(async (folder) => ({ folder, files: await listFolder(folder.id, apiKey) })));
     for (const { folder, files } of results) {
       for (const file of files) {
         const isFolder = file.mimeType === "application/vnd.google-apps.folder";
@@ -53,5 +38,15 @@ while (frontier.length) {
   frontier = next;
 }
 
-await writeNormalized({ generatedAt: new Date().toISOString(), nodes }, new URL("../app/data/archive.generated.json", import.meta.url));
+const target = new URL("../app/data/archive.generated.json", import.meta.url);
+const archive = normalizeArchive({ generatedAt: new Date().toISOString(), nodes });
+const previous = JSON.parse(await fs.readFile(target, "utf8"));
+const content = ({ generatedAt, official, ...rest }) => ({ ...rest, official: official && { ...official, generatedAt: undefined } });
+if (JSON.stringify(content(previous)) === JSON.stringify(content(archive))) {
+  console.log("Archive unchanged; no commit or deployment needed.");
+} else {
+  const temporary = new URL("../app/data/archive.generated.json.tmp", import.meta.url);
+  await fs.writeFile(temporary, JSON.stringify(archive) + "\n", "utf8");
+  await fs.rename(temporary, target);
+}
 console.log(`Synced ${nodes.length} Drive items.`);

@@ -1,3 +1,4 @@
+import { OfficialMedia, type Archive as OfficialArchive } from "./OfficialMedia";
 import { useMemo, useState } from "react";
 
 type Media = {
@@ -17,6 +18,7 @@ export type Archive = {
   sourceFolderId: string;
   members: Collection[];
   other: Collection;
+  official?: OfficialArchive;
 };
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -74,13 +76,14 @@ function MediaTile({ media, showName = false }: { media: Media; showName?: boole
 }
 
 export function InstaArchive({ data }: { data: Archive }) {
+  const [officialOpen, setOfficialOpen] = useState(false);
   const now = new Date();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [shown, setShown] = useState(pageSize);
 
-  const totalMedia = data.members.reduce((sum, item) => sum + item.media.length, 0) + data.other.media.length;
+  const totalMedia = data.members.reduce((sum, item) => sum + item.media.length, 0) + data.other.media.length + (data.official?.media.length || 0);
   const years = useMemo(
     () => collection ? [...new Set(collection.media.map((item) => item.year))].sort((a, b) => b - a) : [],
     [collection],
@@ -106,6 +109,7 @@ export function InstaArchive({ data }: { data: Archive }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  if (officialOpen && data.official) return <OfficialMedia data={data.official} onBack={() => setOfficialOpen(false)} />;
   return (
     <main id="top">
       <header className="masthead">
@@ -115,7 +119,7 @@ export function InstaArchive({ data }: { data: Archive }) {
         </div>
         <h1><span className="solid">INSTA POSTS</span><span className="outline">ARCHIVE</span></h1>
         <div className="stats">
-          <p><strong>{data.members.length + 1}</strong> COLLECTIONS</p><i />
+          <p><strong>{data.members.length + 2}</strong> COLLECTIONS</p><i />
           <p><strong>{totalMedia.toLocaleString("en-US")}</strong> MEDIA FILES</p><i />
           <p>UPDATED <strong>{new Date(data.generatedAt).toLocaleDateString("en-GB")}</strong></p>
         </div>
@@ -136,8 +140,13 @@ export function InstaArchive({ data }: { data: Archive }) {
               </button>
             ))}
           </div>
-          <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
+          <button className="other-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             <span>{String(data.members.length + 1).padStart(2, "0")} / SPECIAL COLLECTION</span>
+            <strong>OFFICIAL_THEBOYZ</strong>
+            <small>{(data.official?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
+          </button>
+          <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
+            <span>{String(data.members.length + 2).padStart(2, "0")} / SPECIAL COLLECTION</span>
             <strong>TBZ ON OTHER PEOPLE’S PROFILES</strong>
             <em>다른 사람 프로필 속 TBZ</em>
             <small>{data.other.media.length.toLocaleString("en-US")} MEDIA FILES →</small>
