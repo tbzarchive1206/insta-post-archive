@@ -7,12 +7,25 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: instagram-drive-sync
+  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+      ref: ${{ steps.commit.outputs.ref }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -20,10 +33,34 @@ jobs:
         env:
           GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       - name: Commit changed archive index
+        id: commit
+        shell: bash
         run: |
-          if git diff --quiet -- app/data/archive.generated.json; then exit 0; fi
+          set -euo pipefail
+          if git diff --quiet -- app/data/archive.generated.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git config user.name "insta-posts-bot"
           git config user.email "insta-posts-bot@users.noreply.github.com"
           git add app/data/archive.generated.json
           git commit -m "chore: sync Instagram posts archive"
-          git push
+          pushed=false
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              pushed=true
+              break
+            fi
+            sleep 5
+          done
+          if [ "$pushed" != true ]; then exit 1; fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  deploy:
+    needs: sync
+    if: needs.sync.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy-pages.yml
+    with:
+      ref: ${{ needs.sync.outputs.ref }}
