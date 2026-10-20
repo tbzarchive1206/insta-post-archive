@@ -8,3 +8,5 @@
 - Zaktualizowano dist do publikacji.
 
 Weryfikacja: pnpm test — kompilacja TypeScript, build Vite i 6 testów zakończone pomyślnie. Nie wykonano ręcznego testu w przeglądarce ani odtwarzania plików na Google Drive. Build zgłasza ostrzeżenie o dużym pakiecie JS zawierającym dane archiwum.
+
+- OFFICIAL_THEBOYZ: data RRMMDD jest wyświetlana po lewej stronie paska z VIEW i DOWNLOAD dla każdego rodzaju medium.

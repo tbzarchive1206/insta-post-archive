@@ -49,7 +49,7 @@ export function OfficialMedia({ data, onBack }: { data: Archive; onBack: () => v
       <div className="member-tabs" aria-label="Filter by one or more members"><button className={selectedMembers.length === 0 ? "selected" : ""} onClick={() => update(() => setSelectedMembers([]))}>ALL</button>{members.map(({ id, label }) => <button className={selectedMembers.includes(id) ? "selected" : ""} onClick={() => toggleMember(id)} key={id} aria-pressed={selectedMembers.includes(id)}>{label}</button>)}</div>
     </section>
     <section className="archive-section"><div className="results-head"><p>{results.length.toLocaleString("en-US")} RESULTS · {sort === "newest" ? "NEWEST FIRST" : "OLDEST FIRST"}</p><a href={sourceUrl} target="_blank" rel="noreferrer">OPEN SOURCE FOLDER ↗</a></div>
-      {results.length ? <div className="media-grid">{results.slice(0, shown).map((item) => <MediaTile key={item.id} media={item} videoLink />)}</div> : <div className="empty"><strong>NO RESULTS</strong>TRY CHANGING THE SEARCH OR FILTERS.</div>}
+      {results.length ? <div className="media-grid">{results.slice(0, shown).map((item) => <MediaTile key={item.id} media={{ ...item, name: String(item.date).slice(2) }} showName videoLink />)}</div> : <div className="empty"><strong>NO RESULTS</strong>TRY CHANGING THE SEARCH OR FILTERS.</div>}
       {shown < results.length && <button className="load-more" onClick={() => setShown((value) => value + pageSize)}>LOAD MORE MEDIA ↓</button>}
     </section>
     <footer><a href="https://tbzarchive.com/">← MAIN ARCHIVE</a><a href="#top">BACK TO TOP ↑</a></footer>
