@@ -16,7 +16,7 @@
   background: var(--white);
   padding: 22px;
   display: grid;
-  grid-template-columns: minmax(120px, .45fr) minmax(300px, 2fr) minmax(190px, .8fr) minmax(120px, .45fr);
+  grid-template-columns: minmax(0, .45fr) minmax(0, 2fr) minmax(0, .8fr) minmax(0, .45fr);
   gap: 24px;
   align-items: center;
   text-align: left;
@@ -35,6 +35,8 @@
 }
 
 .other-profile-tile strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font: 900 clamp(32px, 5vw, 78px)/.82 "Arial Narrow", Arial, sans-serif;
   letter-spacing: -.055em;
 }
@@ -90,10 +92,22 @@
   }
 
   .other-profile-tile strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
     font-size: 40px;
   }
 
   .other-profile-tile small {
     margin-top: auto;
   }
+}
+
+.video-thumbnail { position: relative; display: grid; min-height: 180px; align-items: center; }
+.video-thumbnail img { grid-area: 1 / 1; }
+.video-play { grid-area: 1 / 1; z-index: 1; justify-self: center; max-width: calc(100% - 24px); padding: 12px; background: #0d235f; color: #fff; font: 10px/1.5 "Courier New", monospace; text-align: center; }
+.video-thumbnail:hover .video-play { text-decoration: underline; }
+.other-profile-tile > * { min-width: 0; }
+
+@media (min-width: 721px) {
+  .official-profile-tile { grid-template-columns: minmax(0, .45fr) minmax(0, 2.8fr) minmax(0, .45fr); }
 }

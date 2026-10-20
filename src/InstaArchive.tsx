@@ -1,3 +1,4 @@
+import { MediaTile } from "./MediaTile";
 import { OfficialMedia, type Archive as OfficialArchive } from "./OfficialMedia";
 import { useMemo, useState } from "react";
 
@@ -23,57 +24,7 @@ export type Archive = {
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const pageSize = 28;
-const thumbnail = (id: string, size = "w1200") => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=${size}`;
 const folderUrl = (id: string) => `https://drive.google.com/drive/folders/${encodeURIComponent(id)}`;
-const fileUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
-const previewUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`;
-const directUrl = (id: string) => `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
-
-function MediaActions({ media, showName }: { media: Media; showName: boolean }) {
-  return (
-    <div className="image-actions">
-      {showName && <span className="file-name" title={media.name}>{media.name}</span>}
-      <span className="file-action-links">
-        <a href={fileUrl(media.id)} target="_blank" rel="noreferrer">VIEW ↗</a>
-        <a href={directUrl(media.id)} target="_blank" rel="noreferrer">DOWNLOAD ↓</a>
-      </span>
-    </div>
-  );
-}
-
-function MediaTile({ media, showName = false }: { media: Media; showName?: boolean }) {
-  if (media.kind === "video") {
-    return (
-      <figure className="media-tile video-tile">
-        <iframe src={previewUrl(media.id)} title="Instagram video" allow="autoplay; fullscreen" loading="lazy" />
-        <MediaActions media={media} showName={showName} />
-      </figure>
-    );
-  }
-
-  if (media.kind === "audio") {
-    return (
-      <figure className="media-tile audio-tile">
-        <div className="audio-mark" aria-hidden="true">AUDIO / INSTAGRAM</div>
-        <iframe src={previewUrl(media.id)} title="Instagram audio" allow="autoplay" loading="lazy" />
-        <MediaActions media={media} showName={showName} />
-      </figure>
-    );
-  }
-
-  if (media.kind !== "image") {
-    return <figure className="media-tile unsupported-media"><a className="unsupported-tile" href={fileUrl(media.id)} target="_blank" rel="noreferrer">OPEN FILE IN DRIVE ↗</a><MediaActions media={media} showName={showName} /></figure>;
-  }
-
-  return (
-    <figure className="media-tile">
-      <a href={fileUrl(media.id)} target="_blank" rel="noreferrer" aria-label="Open original image in Google Drive">
-        <img src={thumbnail(media.id)} alt="" loading="lazy" />
-      </a>
-      <MediaActions media={media} showName={showName} />
-    </figure>
-  );
-}
 
 export function InstaArchive({ data }: { data: Archive }) {
   const [officialOpen, setOfficialOpen] = useState(false);
@@ -140,9 +91,9 @@ export function InstaArchive({ data }: { data: Archive }) {
               </button>
             ))}
           </div>
-          <button className="other-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <button className="other-profile-tile official-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             <span>{String(data.members.length + 1).padStart(2, "0")} / SPECIAL COLLECTION</span>
-            <strong>OFFICIAL_THEBOYZ</strong>
+            <strong>OFFICIAL_<wbr />THEBOYZ</strong>
             <small>{(data.official?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
           <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
