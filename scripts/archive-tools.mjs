@@ -1,3 +1,4 @@
+import { normalizeManagement } from "./management-tools.mjs";
 import { normalizeArchive as normalizeOfficial } from "./official-tools.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -55,12 +56,12 @@ function compactMedia(node, includeName = false) {
 }
 
 export function normalizeArchive(raw) {
-  const topFolders = raw.nodes.filter((node) => node.type === "folder" && node.path.length === 1);
+  const topFolders = raw.nodes.filter((node) => node.type === "folder" && node.path.length === 1 && node.path[0] === "INSTA POSTS ARCHIVE");
   const members = allowedMembers.flatMap(([folderNames, displayName]) => {
     const folder = topFolders.find((item) => folderNames.some((folderName) => item.name.replace(/^\d+\.\s*/u, "").toUpperCase().startsWith(folderName)));
     if (!folder) return [];
     const media = raw.nodes
-      .filter((node) => node.type !== "folder" && node.path[1] === folder.name)
+      .filter((node) => node.type !== "folder" && node.path[0] === "INSTA POSTS ARCHIVE" && node.path[1] === folder.name)
       .map((node) => compactMedia(node))
       .sort((a, b) => b.date - a.date);
     return [{ id: folder.id, name: displayName, media }];
@@ -71,7 +72,7 @@ export function normalizeArchive(raw) {
     id: otherFolder?.id || "1zNeQEYRHTviwSAsHwvgxjz9rSXOFVR8l",
     name: "TBZ on Other People’s Profiles",
     media: otherFolder
-      ? raw.nodes.filter((node) => node.type !== "folder" && node.path[1] === otherFolder.name).map((node) => compactMedia(node, true)).sort((a, b) => b.date - a.date)
+      ? raw.nodes.filter((node) => node.type !== "folder" && node.path[0] === "INSTA POSTS ARCHIVE" && node.path[1] === otherFolder.name).map((node) => compactMedia(node, true)).sort((a, b) => b.date - a.date)
       : [],
   };
 
@@ -80,6 +81,7 @@ export function normalizeArchive(raw) {
     sourceFolderId: ROOT_FOLDER_ID,
     members,
     other,
+    management: normalizeManagement(raw),
     official: normalizeOfficial({ generatedAt: raw.generatedAt, nodes: raw.nodes.filter((node) => node.path[0] === "OFFICIAL_THEBOYZ") }),
   };
 }

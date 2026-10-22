@@ -5,15 +5,15 @@ const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
 if (!apiKey) throw new Error("Missing GOOGLE_DRIVE_API_KEY.");
 
 const root = { id: ROOT_FOLDER_ID, title: "INSTA POSTS ARCHIVE", path: [] };
-let frontier = [root, { id: "1yveWb6H9nRlutNZiuv5H9RXKuvnFGM8b", title: "OFFICIAL_THEBOYZ", path: [] }];
+let frontier = [root, { id: "1yveWb6H9nRlutNZiuv5H9RXKuvnFGM8b", title: "OFFICIAL_THEBOYZ", path: [] }, { id: "1RTg8YVRwp0vTVibigF23aMVYExe7u_tT", title: "MGMT COMAPNIES", path: [] }];
 const nodes = [];
 const visited = new Set();
 while (frontier.length) {
   const next = [];
   for (let index = 0; index < frontier.length; index += 8) {
     const batch = frontier.slice(index, index + 8).filter((folder) => {
-      if (visited.has(folder.id)) return false;
-      visited.add(folder.id);
+      if (visited.has(`${folder.path[0] || folder.title}:${folder.id}`)) return false;
+      visited.add(`${folder.path[0] || folder.title}:${folder.id}`);
       return true;
     });
     const results = await Promise.all(batch.map(async (folder) => ({ folder, files: await listFolder(folder.id, apiKey) })));
@@ -41,7 +41,7 @@ while (frontier.length) {
 const target = new URL("../app/data/archive.generated.json", import.meta.url);
 const archive = normalizeArchive({ generatedAt: new Date().toISOString(), nodes });
 const previous = JSON.parse(await fs.readFile(target, "utf8"));
-const content = ({ generatedAt, official, ...rest }) => ({ ...rest, official: official && { ...official, generatedAt: undefined } });
+const content = ({ generatedAt, official, management, ...rest }) => ({ ...rest, official: official && { ...official, generatedAt: undefined }, management: management && { ...management, generatedAt: undefined } });
 if (JSON.stringify(content(previous)) === JSON.stringify(content(archive))) {
   console.log("Archive unchanged; no commit or deployment needed.");
 } else {
