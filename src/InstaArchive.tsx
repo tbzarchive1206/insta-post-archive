@@ -1,4 +1,3 @@
-import { MediaTile } from "./MediaTile";
 import { OfficialMedia, type Archive as OfficialArchive } from "./OfficialMedia";
 import { useMemo, useState } from "react";
 
@@ -20,13 +19,65 @@ export type Archive = {
   members: Collection[];
   other: Collection;
   official?: OfficialArchive;
+  management?: OfficialArchive;
 };
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const pageSize = 28;
+const thumbnail = (id: string, size = "w1200") => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=${size}`;
 const folderUrl = (id: string) => `https://drive.google.com/drive/folders/${encodeURIComponent(id)}`;
+const fileUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
+const previewUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`;
+const directUrl = (id: string) => `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
+
+function MediaActions({ media, showName }: { media: Media; showName: boolean }) {
+  return (
+    <div className="image-actions">
+      {showName && <span className="file-name" title={media.name}>{media.name}</span>}
+      <span className="file-action-links">
+        <a href={fileUrl(media.id)} target="_blank" rel="noreferrer">VIEW ↗</a>
+        <a href={directUrl(media.id)} target="_blank" rel="noreferrer">DOWNLOAD ↓</a>
+      </span>
+    </div>
+  );
+}
+
+function MediaTile({ media, showName = false }: { media: Media; showName?: boolean }) {
+  if (media.kind === "video") {
+    return (
+      <figure className="media-tile video-tile">
+        <iframe src={previewUrl(media.id)} title="Instagram video" allow="autoplay; fullscreen" loading="lazy" />
+        <MediaActions media={media} showName={showName} />
+      </figure>
+    );
+  }
+
+  if (media.kind === "audio") {
+    return (
+      <figure className="media-tile audio-tile">
+        <div className="audio-mark" aria-hidden="true">AUDIO / INSTAGRAM</div>
+        <iframe src={previewUrl(media.id)} title="Instagram audio" allow="autoplay" loading="lazy" />
+        <MediaActions media={media} showName={showName} />
+      </figure>
+    );
+  }
+
+  if (media.kind !== "image") {
+    return <figure className="media-tile unsupported-media"><a className="unsupported-tile" href={fileUrl(media.id)} target="_blank" rel="noreferrer">OPEN FILE IN DRIVE ↗</a><MediaActions media={media} showName={showName} /></figure>;
+  }
+
+  return (
+    <figure className="media-tile">
+      <a href={fileUrl(media.id)} target="_blank" rel="noreferrer" aria-label="Open original image in Google Drive">
+        <img src={thumbnail(media.id)} alt="" loading="lazy" />
+      </a>
+      <MediaActions media={media} showName={showName} />
+    </figure>
+  );
+}
 
 export function InstaArchive({ data }: { data: Archive }) {
+  const [managementOpen, setManagementOpen] = useState(false);
   const [officialOpen, setOfficialOpen] = useState(false);
   const now = new Date();
   const [collection, setCollection] = useState<Collection | null>(null);
@@ -34,7 +85,7 @@ export function InstaArchive({ data }: { data: Archive }) {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [shown, setShown] = useState(pageSize);
 
-  const totalMedia = data.members.reduce((sum, item) => sum + item.media.length, 0) + data.other.media.length + (data.official?.media.length || 0);
+  const totalMedia = data.members.reduce((sum, item) => sum + item.media.length, 0) + data.other.media.length + (data.official?.media.length || 0) + (data.management?.media.length || 0);
   const years = useMemo(
     () => collection ? [...new Set(collection.media.map((item) => item.year))].sort((a, b) => b - a) : [],
     [collection],
@@ -60,6 +111,7 @@ export function InstaArchive({ data }: { data: Archive }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  if (managementOpen && data.management) return <OfficialMedia data={data.management} title="MGMT COMAPNIES" folderMode onBack={() => setManagementOpen(false)} />;
   if (officialOpen && data.official) return <OfficialMedia data={data.official} onBack={() => setOfficialOpen(false)} />;
   return (
     <main id="top">
@@ -70,7 +122,7 @@ export function InstaArchive({ data }: { data: Archive }) {
         </div>
         <h1><span className="solid">INSTA POSTS</span><span className="outline">ARCHIVE</span></h1>
         <div className="stats">
-          <p><strong>{data.members.length + 2}</strong> COLLECTIONS</p><i />
+          <p><strong>{data.members.length + 3}</strong> COLLECTIONS</p><i />
           <p><strong>{totalMedia.toLocaleString("en-US")}</strong> MEDIA FILES</p><i />
           <p>UPDATED <strong>{new Date(data.generatedAt).toLocaleDateString("en-GB")}</strong></p>
         </div>
@@ -91,13 +143,18 @@ export function InstaArchive({ data }: { data: Archive }) {
               </button>
             ))}
           </div>
-          <button className="other-profile-tile official-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <button className="other-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             <span>{String(data.members.length + 1).padStart(2, "0")} / SPECIAL COLLECTION</span>
-            <strong>OFFICIAL_<wbr />THEBOYZ</strong>
+            <strong>OFFICIAL_THEBOYZ</strong>
             <small>{(data.official?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
-          <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
+          <button className="other-profile-tile" onClick={() => { setManagementOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             <span>{String(data.members.length + 2).padStart(2, "0")} / SPECIAL COLLECTION</span>
+            <strong>MGMT COMAPNIES</strong>
+            <small>{(data.management?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
+          </button>
+          <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
+            <span>{String(data.members.length + 3).padStart(2, "0")} / SPECIAL COLLECTION</span>
             <strong>TBZ ON OTHER PEOPLE’S PROFILES</strong>
             <em>다른 사람 프로필 속 TBZ</em>
             <small>{data.other.media.length.toLocaleString("en-US")} MEDIA FILES →</small>

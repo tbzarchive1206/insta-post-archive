@@ -18,3 +18,7 @@ Synchronizacja działa według dotychczasowego harmonogramu 05:17 i 17:17 UTC or
 Po zapisie i pushu indeksu workflow bezpośrednio wywołuje Deploy GitHub Pages przez workflow_call, z identyfikatorem zapisanego commitu. Nie polega na zdarzeniu push wykonanym przez GITHUB_TOKEN. Oddzielne grupy concurrency kolejkują synchronizacje i wdrożenia bez anulowania trwającego przebiegu. Push ponawiany jest po pobraniu najnowszego main i rebase.
 
 W repozytorium wymagany jest secret GOOGLE_DRIVE_API_KEY z dostępem do Google Drive API, publiczny odczyt folderów i Settings → Pages → Source: GitHub Actions. Reguły ochrony main muszą zezwalać botowi na zapis indeksu. Te ustawienia nie są częścią ZIP. Błędy uprawnień są zgłaszane i zachowują poprzedni indeks zamiast publikowania niekompletnej kolekcji.
+
+## MGMT COMAPNIES
+
+Kafelek bezpośrednio pod OFFICIAL_THEBOYZ. Źródło: https://drive.google.com/drive/folders/1RTg8YVRwp0vTVibigF23aMVYExe7u_tT . Indeks początkowy: 194 media w 7 podfolderach (22.10.2026). Filtr FOLDER odwzorowuje bezpośrednie podfoldery źródła, uwzględniając media z ich dalszych podfolderów. Dostępny jest filtr YEAR, wyszukiwanie daty/nazwy oraz sortowanie NEWEST FIRST (domyślne) i OLDEST FIRST. Nowe podfoldery są wykrywane przez synchronizację automatycznie. Galeria korzysta z tego samego widoku i podglądu co OFFICIAL_THEBOYZ. Synchronizacja i automatyczny deployment obejmują nową kolekcję bez dodatkowego workflow ani sekretu.
