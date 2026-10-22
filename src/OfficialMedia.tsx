@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-type Media = { id: string; kind: "image" | "audio" | "video"; mimeType: string; name: string; date: number; year: number; account: string; members: string[]; folderId?: string };
+type Media = { width?: number; height?: number; id: string; kind: "image" | "audio" | "video"; mimeType: string; name: string; date: number; year: number; account: string; members: string[]; folderId?: string };
 export type Archive = { generatedAt: string; sourceFolderId: string; accounts: string[]; media: Media[]; folders?: { id: string; name: string }[] };
 
 const members = [{ id: "Group photo", label: "Group photo" }, { id: "Sangyeon", label: "Sangyeon" }, { id: "Jacob", label: "Jacob" }, { id: "Younghoon", label: "Younghoon" }, { id: "Hyunjae", label: "Hyunjae" }, { id: "Juyeon", label: "Juyeon" }, { id: "Kevin", label: "Kevin" }, { id: "Q", label: "Q" }, { id: "Sunwoo", label: "Sunwoo" }, { id: "Eric", label: "Eric" }, { id: "Hwall", label: "Hwall (2017 - 2019)" }, { id: "Haknyeon", label: "Haknyeon (2017 - 2025)" }, { id: "New", label: "New (2017 - 2026)" }, { id: "Other", label: "OTHER" }];
@@ -23,7 +23,7 @@ const memberMatches = (item: Media, selected: string) => {
 
 function Tile({ item, onOpen, showFileName = false }: { item: Media; onOpen: (item: Media) => void; showFileName?: boolean }) {
   return <article className="media-card">
-    {item.kind === "video" ? <iframe className="media-preview media-video" src={previewUrl(item.id)} title={`Video from ${dateLabel(item.date, item.name)}`} allow="autoplay; fullscreen" loading="lazy" /> : <button className="media-preview" onClick={() => onOpen(item)} aria-label={`View ${dateLabel(item.date, item.name)} on this page`}>
+    {item.kind === "video" ? <iframe style={{ aspectRatio: `${item.width || 16} / ${item.height || 9}`, height: "auto" }} className="media-preview media-video" src={previewUrl(item.id)} title={`Video from ${dateLabel(item.date, item.name)}`} allow="autoplay; fullscreen" loading="lazy" /> : <button className="media-preview" onClick={() => onOpen(item)} aria-label={`View ${dateLabel(item.date, item.name)} on this page`}>
       {item.kind === "image" ? <img src={thumbnail(item.id)} alt="" loading="lazy" /> : <span>{item.kind.toUpperCase()}<br />OPEN ON GOOGLE DRIVE</span>}
     </button>}
     <div className="media-info"><div className={`media-name${showFileName ? " full-file-name" : ""}`}>{showFileName ? item.name.replace(/\.[^.]+$/u, "") : dateLabel(item.date, item.name)}</div><div className="media-actions">{item.kind === "image" ? <button onClick={() => onOpen(item)}>VIEW ↗</button> : <a href={fileUrl(item.id)} target="_blank" rel="noreferrer">VIEW ↗</a>}<a href={downloadUrl(item.id)} target="_blank" rel="noreferrer">DOWNLOAD</a></div></div>

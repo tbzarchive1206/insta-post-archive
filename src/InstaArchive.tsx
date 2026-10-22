@@ -2,6 +2,8 @@ import { OfficialMedia, type Archive as OfficialArchive } from "./OfficialMedia"
 import { useMemo, useState } from "react";
 
 type Media = {
+  width?: number;
+  height?: number;
   id: string;
   kind: "image" | "audio" | "video" | "other";
   mimeType: string;
@@ -46,7 +48,7 @@ function MediaTile({ media, showName = false }: { media: Media; showName?: boole
   if (media.kind === "video") {
     return (
       <figure className="media-tile video-tile">
-        <iframe src={previewUrl(media.id)} title="Instagram video" allow="autoplay; fullscreen" loading="lazy" />
+        <iframe style={{ aspectRatio: `${media.width || 16} / ${media.height || 9}`, height: "auto" }} src={previewUrl(media.id)} title="Instagram video" allow="autoplay; fullscreen" loading="lazy" />
         <MediaActions media={media} showName={showName} />
       </figure>
     );

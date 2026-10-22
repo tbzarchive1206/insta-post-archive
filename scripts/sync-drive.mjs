@@ -26,6 +26,7 @@ while (frontier.length) {
           mimeType: file.mimeType,
           type: isFolder ? "folder" : "file",
           size: file.size || null,
+          videoMediaMetadata: file.videoMediaMetadata || null,
           createdTime: file.createdTime || null,
           modifiedTime: file.modifiedTime || null,
           path: [...folder.path, folder.title],

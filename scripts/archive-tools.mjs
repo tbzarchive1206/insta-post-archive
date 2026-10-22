@@ -1,3 +1,4 @@
+import { videoDimensions } from "./video-metadata.mjs";
 import { normalizeManagement } from "./management-tools.mjs";
 import { normalizeArchive as normalizeOfficial } from "./official-tools.mjs";
 import fs from "node:fs/promises";
@@ -46,6 +47,7 @@ function compactMedia(node, includeName = false) {
   const date = dateCode(node.name, node.modifiedTime);
   const value = String(date).padStart(8, "0");
   return {
+    ...videoDimensions(node),
     id: node.id,
     ...(includeName ? { name: node.name } : {}),
     kind,

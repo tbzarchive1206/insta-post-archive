@@ -1,3 +1,4 @@
+import { videoDimensions } from "./video-metadata.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,7 +36,7 @@ function compactMedia(node) {
   const kind = node.mimeType.startsWith("image/") ? "image" : node.mimeType.startsWith("audio/") ? "audio" : node.mimeType.startsWith("video/") ? "video" : "other";
   const date = dateCode(node.name, node.modifiedTime);
   const searchable = [node.name, ...node.path].join(" ");
-  return { id: node.id, kind, mimeType: node.mimeType, name: node.name, date, year: Number(String(date).slice(0, 4)), account: node.path[1] || "Unsorted", members: [...memberRules.filter(([, rule]) => rule.test(searchable)).map(([name]) => name), ...(/\bother\b/iu.test(node.name) ? ["Other"] : [])] };
+  return { ...videoDimensions(node), id: node.id, kind, mimeType: node.mimeType, name: node.name, date, year: Number(String(date).slice(0, 4)), account: node.path[1] || "Unsorted", members: [...memberRules.filter(([, rule]) => rule.test(searchable)).map(([name]) => name), ...(/\bother\b/iu.test(node.name) ? ["Other"] : [])] };
 }
 
 export function normalizeArchive(raw) {

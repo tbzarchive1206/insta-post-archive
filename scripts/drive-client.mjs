@@ -7,7 +7,7 @@ export async function listFolder(folderId, apiKey, { fetchImpl = fetch, sleep = 
     const params = new URLSearchParams({
       key: apiKey,
       q: `'${folderId}' in parents and trashed = false`,
-      fields: "nextPageToken,incompleteSearch,files(id,name,mimeType,size,createdTime,modifiedTime)",
+      fields: "nextPageToken,incompleteSearch,files(id,name,mimeType,size,createdTime,modifiedTime,videoMediaMetadata(width,height))",
       pageSize: "1000",
       orderBy: "name",
     });
