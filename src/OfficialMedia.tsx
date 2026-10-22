@@ -21,16 +21,23 @@ const memberMatches = (item: Media, selected: string) => {
   return false;
 };
 
-function Tile({ item, onOpen }: { item: Media; onOpen: (item: Media) => void }) {
+function Tile({ item, onOpen, showFileName = false }: { item: Media; onOpen: (item: Media) => void; showFileName?: boolean }) {
   return <article className="media-card">
     {item.kind === "video" ? <iframe className="media-preview media-video" src={previewUrl(item.id)} title={`Video from ${dateLabel(item.date, item.name)}`} allow="autoplay; fullscreen" loading="lazy" /> : <button className="media-preview" onClick={() => onOpen(item)} aria-label={`View ${dateLabel(item.date, item.name)} on this page`}>
       {item.kind === "image" ? <img src={thumbnail(item.id)} alt="" loading="lazy" /> : <span>{item.kind.toUpperCase()}<br />OPEN ON GOOGLE DRIVE</span>}
     </button>}
-    <div className="media-info"><div className="media-name">{dateLabel(item.date, item.name)}</div><div className="media-actions">{item.kind === "image" ? <button onClick={() => onOpen(item)}>VIEW ↗</button> : <a href={fileUrl(item.id)} target="_blank" rel="noreferrer">VIEW ↗</a>}<a href={downloadUrl(item.id)} target="_blank" rel="noreferrer">DOWNLOAD</a></div></div>
+    <div className="media-info"><div className={`media-name${showFileName ? " full-file-name" : ""}`}>{showFileName ? item.name.replace(/\.[^.]+$/u, "") : dateLabel(item.date, item.name)}</div><div className="media-actions">{item.kind === "image" ? <button onClick={() => onOpen(item)}>VIEW ↗</button> : <a href={fileUrl(item.id)} target="_blank" rel="noreferrer">VIEW ↗</a>}<a href={downloadUrl(item.id)} target="_blank" rel="noreferrer">DOWNLOAD</a></div></div>
   </article>;
 }
 
-export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folderMode = false }: { data: Archive; onBack: () => void; title?: string; folderMode?: boolean }) {
+export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folderMode = false, otherMode = false }: { data: Archive; onBack: () => void; title?: string; folderMode?: boolean; otherMode?: boolean }) {
+  const memberOptions = otherMode ? [{ id: "Group", label: "Group" }, ...members.filter(({ id }) => !["Group photo", "Hwall", "Haknyeon", "Other"].includes(id))] : members;
+  const matches = (item: Media, selected: string) => {
+    if (!otherMode) return memberMatches(item, selected);
+    if (selected === "Group") return /\bTHE\s+BOYZ\b/iu.test(item.name);
+    const aliases: Record<string, string> = { Q: "q|changmin", New: "new|chanhee" };
+    return new RegExp(`\\b(${aliases[selected] || selected})\\b`, "iu").test(item.name);
+  };
   const [folder, setFolder] = useState("all");
   const [query, setQuery] = useState("");
   const [year, setYear] = useState("all");
@@ -44,10 +51,10 @@ export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folder
     const search = query.trim().toLocaleLowerCase();
     return data.media.filter((item) => year === "all" || item.year === Number(year))
       .filter((item) => !folderMode || folder === "all" || item.folderId === folder)
-      .filter((item) => selectedMembers.every((selected) => memberMatches(item, selected)))
+      .filter((item) => selectedMembers.every((selected) => matches(item, selected)))
       .filter((item) => !search || [item.name, ...item.members, String(item.date)].join(" ").toLocaleLowerCase().includes(search))
       .sort((a, b) => sort === "newest" ? b.date - a.date : a.date - b.date);
-  }, [data, folder, folderMode, query, selectedMembers, sort, year]);
+  }, [data, folder, folderMode, otherMode, query, selectedMembers, sort, year]);
   const update = (fn: () => void) => { fn(); setShown(pageSize); };
   const sourceUrl = `https://drive.google.com/drive/folders/${encodeURIComponent(data.sourceFolderId)}`;
   const toggleMember = (id: string) => update(() => setSelectedMembers((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
@@ -81,10 +88,10 @@ export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folder
         <label>YEAR<select value={year} onChange={(event) => update(() => setYear(event.target.value))}><option value="all">ALL YEARS</option>{years.map((value) => <option key={value}>{value}</option>)}</select></label>
         <label>SORT<select value={sort} onChange={(event) => update(() => setSort(event.target.value as "newest" | "oldest"))}><option value="newest">NEWEST FIRST</option><option value="oldest">OLDEST FIRST</option></select></label>
       </div>
-      {!folderMode && <div className="member-tabs" aria-label="Filter by one or more members"><button className={selectedMembers.length === 0 ? "selected" : ""} onClick={() => update(() => setSelectedMembers([]))}>ALL</button>{members.map(({ id, label }) => <button className={selectedMembers.includes(id) ? "selected" : ""} onClick={() => toggleMember(id)} key={id} aria-pressed={selectedMembers.includes(id)}>{label}</button>)}</div>}
+      {!folderMode && <div className="member-tabs" aria-label="Filter by one or more members"><button className={selectedMembers.length === 0 ? "selected" : ""} onClick={() => update(() => setSelectedMembers([]))}>ALL</button>{memberOptions.map(({ id, label }) => <button className={selectedMembers.includes(id) ? "selected" : ""} onClick={() => toggleMember(id)} key={id} aria-pressed={selectedMembers.includes(id)}>{label}</button>)}</div>}
     </section>
     <section className="archive-section"><div className="results-head"><p>{results.length.toLocaleString("en-US")} RESULTS · {sort === "newest" ? "NEWEST FIRST" : "OLDEST FIRST"}</p><a href={sourceUrl} target="_blank" rel="noreferrer">OPEN SOURCE FOLDER ↗</a></div>
-      {results.length ? <div className="media-grid">{results.slice(0, shown).map((item) => <Tile key={item.id} item={item} onOpen={openItem} />)}</div> : <div className="empty"><strong>NO RESULTS</strong>TRY CHANGING THE SEARCH OR FILTERS.</div>}
+      {results.length ? <div className="media-grid">{results.slice(0, shown).map((item) => <Tile key={item.id} item={item} onOpen={openItem} showFileName={otherMode} />)}</div> : <div className="empty"><strong>NO RESULTS</strong>TRY CHANGING THE SEARCH OR FILTERS.</div>}
       {shown < results.length && <button className="load-more" onClick={() => setShown((value) => value + pageSize)}>LOAD MORE MEDIA ↓</button>}
     </section>
     <footer><a href="https://tbzarchive.com/">← MAIN ARCHIVE</a><a href="#top">BACK TO TOP ↑</a></footer>

@@ -6,3 +6,5 @@
 .official-gallery .filter-row{grid-template-columns:repeat(2,minmax(0,1fr))}.official-gallery .masthead h1{font-size:clamp(30px,8vw,140px);overflow-wrap:anywhere}
 
 .official-gallery .filter-row.folder-filters{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:720px){.official-gallery .filter-row.folder-filters{grid-template-columns:1fr}.official-gallery .folder-filters label{min-height:44px}}
+
+.official-gallery .full-file-name{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;flex:1}.official-gallery .media-info:has(.full-file-name){flex-wrap:wrap;align-items:flex-start}.official-gallery .media-info:has(.full-file-name) .media-actions{margin-left:auto}

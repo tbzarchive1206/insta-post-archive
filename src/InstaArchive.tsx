@@ -77,6 +77,7 @@ function MediaTile({ media, showName = false }: { media: Media; showName?: boole
 }
 
 export function InstaArchive({ data }: { data: Archive }) {
+  const [otherOpen, setOtherOpen] = useState(false);
   const [managementOpen, setManagementOpen] = useState(false);
   const [officialOpen, setOfficialOpen] = useState(false);
   const now = new Date();
@@ -111,6 +112,7 @@ export function InstaArchive({ data }: { data: Archive }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  if (otherOpen) return <OfficialMedia data={{ generatedAt: data.generatedAt, sourceFolderId: data.other.id, accounts: [], media: data.other.media.filter((item) => item.kind === "image" || item.kind === "audio" || item.kind === "video").map((item) => ({ ...item, kind: item.kind as "image" | "audio" | "video", name: item.name || "", account: "", members: [] })) }} title="OTHER ACCS" otherMode onBack={() => setOtherOpen(false)} />;
   if (managementOpen && data.management) return <OfficialMedia data={data.management} title="MGMT COMAPNIES" folderMode onBack={() => setManagementOpen(false)} />;
   if (officialOpen && data.official) return <OfficialMedia data={data.official} onBack={() => setOfficialOpen(false)} />;
   return (
@@ -153,10 +155,9 @@ export function InstaArchive({ data }: { data: Archive }) {
             <strong>MGMT COMAPNIES</strong>
             <small>{(data.management?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
-          <button className="other-profile-tile" onClick={() => chooseCollection(data.other)}>
+          <button className="other-profile-tile" onClick={() => { setOtherOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             <span>{String(data.members.length + 3).padStart(2, "0")} / SPECIAL COLLECTION</span>
-            <strong>TBZ ON OTHER PEOPLE’S PROFILES</strong>
-            <em>다른 사람 프로필 속 TBZ</em>
+            <strong>OTHER ACCS</strong>
             <small>{data.other.media.length.toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
         </section>

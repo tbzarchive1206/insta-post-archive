@@ -11,7 +11,7 @@ test("builds the self-contained Instagram archive for GitHub Pages", async () =>
   assert.match(html, /INSTA POSTS ARCHIVE/);
   assert.match(html, /\.\/assets\//);
   assert.match(script, /SELECT A PROFILE/);
-  assert.match(script, /OTHER PEOPLE/);
+  assert.match(script, /OTHER ACCS/);
   assert.match(script, /Haknyeon \(2017 - 2025\)/);
   assert.match(script, /New \(2017 - 2026\)/);
   assert.doesNotMatch(html, /_next|_vinext/);
