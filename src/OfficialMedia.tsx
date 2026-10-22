@@ -9,7 +9,7 @@ const thumbnail = (id: string) => `https://drive.google.com/thumbnail?id=${encod
 const fileUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
 const downloadUrl = (id: string) => `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
 const previewUrl = (id: string) => `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`;
-const dateLabel = (date: number) => String(date).slice(2);
+const dateLabel = (date: number, name: string) => name.match(/(?<!\d)(\d{6})(?!\d)/u)?.[1] || (date ? String(date).slice(2) : "UNDATED");
 const memberMatches = (item: Media, selected: string) => {
   if (selected === "Other") return /\bother\b/iu.test(item.name);
   const tagged = item.members.some((member) => member === selected || member.replace(/\s*\(.*/, "") === selected);
@@ -23,10 +23,10 @@ const memberMatches = (item: Media, selected: string) => {
 
 function Tile({ item, onOpen }: { item: Media; onOpen: (item: Media) => void }) {
   return <article className="media-card">
-    {item.kind === "video" ? <iframe className="media-preview media-video" src={previewUrl(item.id)} title={`Video from ${dateLabel(item.date)}`} allow="autoplay; fullscreen" loading="lazy" /> : <button className="media-preview" onClick={() => onOpen(item)} aria-label={`View ${dateLabel(item.date)} on this page`}>
+    {item.kind === "video" ? <iframe className="media-preview media-video" src={previewUrl(item.id)} title={`Video from ${dateLabel(item.date, item.name)}`} allow="autoplay; fullscreen" loading="lazy" /> : <button className="media-preview" onClick={() => onOpen(item)} aria-label={`View ${dateLabel(item.date, item.name)} on this page`}>
       {item.kind === "image" ? <img src={thumbnail(item.id)} alt="" loading="lazy" /> : <span>{item.kind.toUpperCase()}<br />OPEN ON GOOGLE DRIVE</span>}
     </button>}
-    <div className="media-info"><div className="media-name">{dateLabel(item.date)}</div><div className="media-actions">{item.kind === "image" ? <button onClick={() => onOpen(item)}>VIEW ↗</button> : <a href={fileUrl(item.id)} target="_blank" rel="noreferrer">VIEW ↗</a>}<a href={downloadUrl(item.id)} target="_blank" rel="noreferrer">DOWNLOAD</a></div></div>
+    <div className="media-info"><div className="media-name">{dateLabel(item.date, item.name)}</div><div className="media-actions">{item.kind === "image" ? <button onClick={() => onOpen(item)}>VIEW ↗</button> : <a href={fileUrl(item.id)} target="_blank" rel="noreferrer">VIEW ↗</a>}<a href={downloadUrl(item.id)} target="_blank" rel="noreferrer">DOWNLOAD</a></div></div>
   </article>;
 }
 
@@ -88,6 +88,6 @@ export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folder
       {shown < results.length && <button className="load-more" onClick={() => setShown((value) => value + pageSize)}>LOAD MORE MEDIA ↓</button>}
     </section>
     <footer><a href="https://tbzarchive.com/">← MAIN ARCHIVE</a><a href="#top">BACK TO TOP ↑</a></footer>
-    {openMedia && <div className="image-dialog" role="dialog" aria-modal="true" aria-label={`Image from ${dateLabel(openMedia.date)}`} onClick={() => setOpenMedia(null)}><div className="image-dialog-shell" onClick={(event) => event.stopPropagation()} onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { const start = touchStartX.current; const end = event.changedTouches[0]?.clientX; touchStartX.current = null; if (start !== null && end !== undefined && Math.abs(start - end) > 45) moveImage(start > end ? 1 : -1); }}><header><span>{dateLabel(openMedia.date)} · {openIndex + 1} / {results.length}</span><div><a href={downloadUrl(openMedia.id)} target="_blank" rel="noreferrer">DOWNLOAD</a><button onClick={() => setOpenMedia(null)} aria-label="Close image preview">×</button></div></header><button className="image-nav previous" onClick={() => moveImage(-1)} aria-label="Previous image">←</button><img src={thumbnail(openMedia.id).replace("w1200", "w2400")} alt="" /><button className="image-nav next" onClick={() => moveImage(1)} aria-label="Next image">→</button></div></div>}
+    {openMedia && <div className="image-dialog" role="dialog" aria-modal="true" aria-label={`Image from ${dateLabel(openMedia.date, openMedia.name)}`} onClick={() => setOpenMedia(null)}><div className="image-dialog-shell" onClick={(event) => event.stopPropagation()} onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { const start = touchStartX.current; const end = event.changedTouches[0]?.clientX; touchStartX.current = null; if (start !== null && end !== undefined && Math.abs(start - end) > 45) moveImage(start > end ? 1 : -1); }}><header><span>{dateLabel(openMedia.date, openMedia.name)} · {openIndex + 1} / {results.length}</span><div><a href={downloadUrl(openMedia.id)} target="_blank" rel="noreferrer">DOWNLOAD</a><button onClick={() => setOpenMedia(null)} aria-label="Close image preview">×</button></div></header><button className="image-nav previous" onClick={() => moveImage(-1)} aria-label="Previous image">←</button><img src={thumbnail(openMedia.id).replace("w1200", "w2400")} alt="" /><button className="image-nav next" onClick={() => moveImage(1)} aria-label="Next image">→</button></div></div>}
   </main>;
 }
