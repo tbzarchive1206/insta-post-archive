@@ -45,3 +45,15 @@ test("keeps official media separate and parses Twitter filename tags and dates",
  assert.equal(archive.official.media[1].date, 20171206);
  assert.equal(archive.other.media.length, 0);
 });
+
+test("OTHER ACCS survives Drive folder renaming and includes nested files", () => {
+ for (const name of ["OTHER ACCOUNTS", "OTHER ACCS", "Renamed collection"]) {
+  const archive = normalizeArchive({generatedAt: "2026-10-22", nodes: [
+   {id: "1zNeQEYRHTviwSAsHwvgxjz9rSXOFVR8l", name, type: "folder", path: ["INSTA POSTS ARCHIVE"]},
+   {id: "post", name: "261022 THE BOYZ.jpg", type: "file", mimeType: "image/jpeg", path: ["INSTA POSTS ARCHIVE", name, "2026"]}
+  ]});
+  assert.equal(archive.other.media.length, 1);
+  assert.equal(archive.other.media[0].name, "261022 THE BOYZ.jpg");
+  assert.equal(archive.other.name, "OTHER ACCS");
+ }
+});

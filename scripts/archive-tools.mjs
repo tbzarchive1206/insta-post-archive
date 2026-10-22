@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+export const OTHER_FOLDER_ID = "1zNeQEYRHTviwSAsHwvgxjz9rSXOFVR8l";
 export const ROOT_FOLDER_ID = "18x3sDWTEUpoZVWT3sHc1Q0oWqgXCmc1G";
 
 const allowedMembers = [
@@ -67,10 +68,10 @@ export function normalizeArchive(raw) {
     return [{ id: folder.id, name: displayName, media }];
   });
 
-  const otherFolder = topFolders.find((folder) => folder.name.startsWith("TBZ on Other People"));
+  const otherFolder = topFolders.find((folder) => folder.id === OTHER_FOLDER_ID) || topFolders.find((folder) => /^(?:TBZ on Other People|OTHER ACCS|OTHER ACCOUNTS)/iu.test(folder.name.replace(/^\d+\.\s*/u, "")));
   const other = {
-    id: otherFolder?.id || "1zNeQEYRHTviwSAsHwvgxjz9rSXOFVR8l",
-    name: "TBZ on Other People’s Profiles",
+    id: otherFolder?.id || OTHER_FOLDER_ID,
+    name: "OTHER ACCS",
     media: otherFolder
       ? raw.nodes.filter((node) => node.type !== "folder" && node.path[0] === "INSTA POSTS ARCHIVE" && node.path[1] === otherFolder.name).map((node) => compactMedia(node, true)).sort((a, b) => b.date - a.date)
       : [],

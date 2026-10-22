@@ -145,17 +145,17 @@ export function InstaArchive({ data }: { data: Archive }) {
               </button>
             ))}
           </div>
-          <button className="other-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <button className="other-profile-tile" onClick={() => { setOfficialOpen(true); window.scrollTo({ top: 0, behavior: "instant" }); }}>
             <span>{String(data.members.length + 1).padStart(2, "0")} / SPECIAL COLLECTION</span>
-            <strong>OFFICIAL_THEBOYZ</strong>
+            <strong>OFFICIAL THE BOYZ</strong>
             <small>{(data.official?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
-          <button className="other-profile-tile" onClick={() => { setManagementOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <button className="other-profile-tile" onClick={() => { setManagementOpen(true); window.scrollTo({ top: 0, behavior: "instant" }); }}>
             <span>{String(data.members.length + 2).padStart(2, "0")} / SPECIAL COLLECTION</span>
             <strong>MGMT COMAPNIES</strong>
             <small>{(data.management?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
-          <button className="other-profile-tile" onClick={() => { setOtherOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <button className="other-profile-tile" onClick={() => { setOtherOpen(true); window.scrollTo({ top: 0, behavior: "instant" }); }}>
             <span>{String(data.members.length + 3).padStart(2, "0")} / SPECIAL COLLECTION</span>
             <strong>OTHER ACCS</strong>
             <small>{data.other.media.length.toLocaleString("en-US")} MEDIA FILES →</small>

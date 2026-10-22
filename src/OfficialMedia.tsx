@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type Media = { id: string; kind: "image" | "audio" | "video"; mimeType: string; name: string; date: number; year: number; account: string; members: string[]; folderId?: string };
 export type Archive = { generatedAt: string; sourceFolderId: string; accounts: string[]; media: Media[]; folders?: { id: string; name: string }[] };
@@ -30,7 +30,8 @@ function Tile({ item, onOpen, showFileName = false }: { item: Media; onOpen: (it
   </article>;
 }
 
-export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folderMode = false, otherMode = false }: { data: Archive; onBack: () => void; title?: string; folderMode?: boolean; otherMode?: boolean }) {
+export function OfficialMedia({ data, onBack, title = "OFFICIAL THE BOYZ", folderMode = false, otherMode = false }: { data: Archive; onBack: () => void; title?: string; folderMode?: boolean; otherMode?: boolean }) {
+  useLayoutEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); }, []);
   const memberOptions = otherMode ? [{ id: "Group", label: "Group" }, ...members.filter(({ id }) => !["Group photo", "Hwall", "Haknyeon", "Other"].includes(id))] : members;
   const matches = (item: Media, selected: string) => {
     if (!otherMode) return memberMatches(item, selected);
@@ -84,7 +85,7 @@ export function OfficialMedia({ data, onBack, title = "OFFICIAL_THEBOYZ", folder
     <button className="official-back" onClick={onBack}>← ALL PROFILES</button><section className="controls" aria-label="Official Instagram media filters">
       <label className="search"><span aria-hidden="true">⌕</span><input value={query} onChange={(event) => update(() => setQuery(event.target.value))} type="search" placeholder={folderMode ? "SEARCH DATE OR FILE NAME..." : "SEARCH DATE OR MEMBER..."} /></label>
       <div className={`filter-row${folderMode ? " folder-filters" : ""}`}>
-        {folderMode && <label>FOLDER<select value={folder} onChange={(event) => update(() => setFolder(event.target.value))}><option value="all">ALL FOLDERS</option>{data.folders?.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
+        {folderMode && <label>COMPANY<select value={folder} onChange={(event) => update(() => setFolder(event.target.value))}><option value="all">ALL COMPANIES</option>{data.folders?.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
         <label>YEAR<select value={year} onChange={(event) => update(() => setYear(event.target.value))}><option value="all">ALL YEARS</option>{years.map((value) => <option key={value}>{value}</option>)}</select></label>
         <label>SORT<select value={sort} onChange={(event) => update(() => setSort(event.target.value as "newest" | "oldest"))}><option value="newest">NEWEST FIRST</option><option value="oldest">OLDEST FIRST</option></select></label>
       </div>
