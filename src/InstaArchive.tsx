@@ -1,3 +1,4 @@
+import { MemberName } from "./MemberName";
 import { OfficialMedia, type Archive as OfficialArchive } from "./OfficialMedia";
 import { useMemo, useState } from "react";
 
@@ -115,7 +116,7 @@ export function InstaArchive({ data }: { data: Archive }) {
   };
 
   if (otherOpen) return <OfficialMedia data={{ generatedAt: data.generatedAt, sourceFolderId: data.other.id, accounts: [], media: data.other.media.filter((item) => item.kind === "image" || item.kind === "audio" || item.kind === "video").map((item) => ({ ...item, kind: item.kind as "image" | "audio" | "video", name: item.name || "", account: "", members: [] })) }} title="OTHER ACCS" otherMode onBack={() => setOtherOpen(false)} />;
-  if (managementOpen && data.management) return <OfficialMedia data={data.management} title="MGMT COMAPNIES" folderMode onBack={() => setManagementOpen(false)} />;
+  if (managementOpen && data.management) return <OfficialMedia data={data.management} title="MGMT COMPANIES" folderMode onBack={() => setManagementOpen(false)} />;
   if (officialOpen && data.official) return <OfficialMedia data={data.official} onBack={() => setOfficialOpen(false)} />;
   return (
     <main id="top">
@@ -142,7 +143,7 @@ export function InstaArchive({ data }: { data: Archive }) {
             {data.members.map((item, index) => (
               <button key={item.id} onClick={() => chooseCollection(item)}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{item.name.toUpperCase()}</strong>
+                <strong><MemberName name={item.name} /></strong>
                 <small>{item.media.length.toLocaleString("en-US")} MEDIA FILES →</small>
               </button>
             ))}
@@ -154,7 +155,7 @@ export function InstaArchive({ data }: { data: Archive }) {
           </button>
           <button className="other-profile-tile" onClick={() => { setManagementOpen(true); window.scrollTo({ top: 0, behavior: "instant" }); }}>
             <span>{String(data.members.length + 2).padStart(2, "0")} / SPECIAL COLLECTION</span>
-            <strong>MGMT COMAPNIES</strong>
+            <strong>MGMT COMPANIES</strong>
             <small>{(data.management?.media.length || 0).toLocaleString("en-US")} MEDIA FILES →</small>
           </button>
           <button className="other-profile-tile" onClick={() => { setOtherOpen(true); window.scrollTo({ top: 0, behavior: "instant" }); }}>

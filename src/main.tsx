@@ -21,3 +21,5 @@ createRoot(document.getElementById("root")!).render(
 );
 
 import "./official.css";
+
+import "./member-responsive.css";
